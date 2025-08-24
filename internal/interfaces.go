@@ -1,17 +1,13 @@
 // interfaces.go - Интерфейсы для тестирования
 package logger
 
-import (
-	conf "kvasdns/internal/config"
-)
-
 // LogClientInterface интерфейс для клиента логгера
 type LogClientInterface interface {
 	SetService(service string) *ServiceLogger
 	SetLevel(level LogLevel)
 	SetServerLevel(level LogLevel) error
 	GetLogFile() string
-	UpdateConfig(config *conf.LoggingConfig) error
+	UpdateConfig(config *LoggingConfig) error
 	LogPanic()
 	GetLogEntries(filter FilterOptions) ([]LogEntry, error)
 	Ping() error

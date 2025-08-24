@@ -3,18 +3,15 @@ package logger
 
 import (
 	"encoding/json"
-
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
-
-	"kvasdns/internal/config"
 )
 
 // createTestServerConfig создает тестовую конфигурацию для сервера
-func createTestServerConfig(t *testing.T) *config.LoggingConfig {
+func createTestServerConfig(t *testing.T) *LoggingConfig {
 	tmpDir, err := os.MkdirTemp("", "logger_server_test")
 	if err != nil {
 		t.Fatalf("не удалось создать временную директорию: %v", err)
@@ -25,7 +22,7 @@ func createTestServerConfig(t *testing.T) *config.LoggingConfig {
 		os.RemoveAll(tmpDir)
 	})
 
-	return &config.LoggingConfig{
+	return &LoggingConfig{
 		LogFile:       filepath.Join(tmpDir, "test.log"),
 		SocketPath:    filepath.Join(tmpDir, "test.sock"),
 		Level:         "INFO",
@@ -66,18 +63,18 @@ func TestNewLogServer(t *testing.T) {
 func TestNewLogServerWithInvalidConfig(t *testing.T) {
 	tests := []struct {
 		name   string
-		config *config.LoggingConfig
+		config *LoggingConfig
 	}{
 		{
 			name: "пустой путь к файлу лога",
-			config: &config.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "",
 				SocketPath: "/tmp/test.sock",
 			},
 		},
 		{
 			name: "пустой путь к сокету",
-			config: &config.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "/tmp/test.log",
 				SocketPath: "",
 			},

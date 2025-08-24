@@ -3,14 +3,13 @@ package logger
 
 import (
 	"fmt"
+
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
-
-	"kvasdns/internal/config"
 )
 
 // SecurityConfig конфигурация безопасности
@@ -174,7 +173,7 @@ func ValidateMessage(msg *LogMessage, config *SecurityConfig) error {
 }
 
 // ValidateConfig проверяет безопасность конфигурации
-func ValidateConfig(config *config.LoggingConfig) error {
+func ValidateConfig(config *LoggingConfig) error {
 	// Проверяем, что конфигурация не nil
 	if config == nil {
 		return fmt.Errorf("конфигурация не может быть nil")

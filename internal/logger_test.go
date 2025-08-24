@@ -3,15 +3,13 @@ package logger
 
 import (
 	"testing"
-
-	conf "kvasdns/internal/config"
 )
 
 // TestNew проверяет создание нового логгера
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name     string
-		config   *conf.LoggingConfig
+		config   *LoggingConfig
 		services []string
 		wantErr  bool
 	}{
@@ -23,7 +21,7 @@ func TestNew(t *testing.T) {
 		},
 		{
 			name: "создание с валидной конфигурацией",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				Level:      "INFO",
 				SocketPath: "/tmp/test_logger.sock",
 				Services:   []string{"MAIN"},
@@ -33,7 +31,7 @@ func TestNew(t *testing.T) {
 		},
 		{
 			name: "создание с дублирующимися сервисами",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				Level:      "DEBUG",
 				SocketPath: "/tmp/test_logger.sock",
 				Services:   []string{"MAIN", "TEST"},
@@ -266,7 +264,7 @@ func TestUpdateConfig(t *testing.T) {
 	mockClient := &MockLogClient{}
 	logger := &Logger{client: mockClient}
 
-	newConfig := &conf.LoggingConfig{
+	newConfig := &LoggingConfig{
 		Level:      "ERROR",
 		SocketPath: "/tmp/new_logger.sock",
 		Services:   []string{"NEW_SERVICE"},

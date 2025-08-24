@@ -4,8 +4,6 @@ package logger
 import (
 	"sync"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 // MockError простая реализация ошибки для тестов
@@ -27,7 +25,7 @@ type MockLogClient struct {
 	pingError         error
 	logEntries        []LogEntry
 	serviceLoggers    map[string]*ServiceLogger
-	config            *conf.LoggingConfig
+	config            *LoggingConfig
 	connected         bool
 	customSendMessage func(service string, level LogLevel, message string) error
 }
@@ -106,7 +104,7 @@ func (m *MockLogClient) GetLogFile() string {
 }
 
 // UpdateConfig обновляет конфигурацию (мок)
-func (m *MockLogClient) UpdateConfig(config *conf.LoggingConfig) error {
+func (m *MockLogClient) UpdateConfig(config *LoggingConfig) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -323,8 +321,8 @@ func (a *MockAddr) String() string {
 }
 
 // MockConfig создает мок конфигурации для тестов
-func MockConfig() *conf.LoggingConfig {
-	return &conf.LoggingConfig{
+func MockConfig() *LoggingConfig {
+	return &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: "/tmp/test_logger.sock",
 		Services:   []string{"MAIN", "TEST"},
@@ -332,8 +330,8 @@ func MockConfig() *conf.LoggingConfig {
 }
 
 // MockConfigWithLevel создает мок конфигурации с указанным уровнем
-func MockConfigWithLevel(level string) *conf.LoggingConfig {
-	return &conf.LoggingConfig{
+func MockConfigWithLevel(level string) *LoggingConfig {
+	return &LoggingConfig{
 		Level:      level,
 		SocketPath: "/tmp/test_logger.sock",
 		Services:   []string{"MAIN", "TEST"},
@@ -341,8 +339,8 @@ func MockConfigWithLevel(level string) *conf.LoggingConfig {
 }
 
 // MockConfigWithServices создает мок конфигурации с указанными сервисами
-func MockConfigWithServices(services []string) *conf.LoggingConfig {
-	return &conf.LoggingConfig{
+func MockConfigWithServices(services []string) *LoggingConfig {
+	return &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: "/tmp/test_logger.sock",
 		Services:   services,

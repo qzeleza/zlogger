@@ -6,8 +6,6 @@ import (
 	"net"
 	"os"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 var _ API = (*Logger)(nil) // compile-time guarantee
@@ -19,7 +17,7 @@ type Logger struct {
 }
 
 // New создает новый экземпляр логгера для клиентского приложения
-func New(config *conf.LoggingConfig, services []string) (*Logger, error) {
+func New(config *LoggingConfig, services []string) (*Logger, error) {
 	if config == nil {
 		return nil, fmt.Errorf("конфигурация не может быть nil")
 	}
@@ -96,7 +94,7 @@ func (l *Logger) GetLogFile() string {
 }
 
 // UpdateConfig обновляет конфигурацию логгера
-func (l *Logger) UpdateConfig(config *conf.LoggingConfig) error {
+func (l *Logger) UpdateConfig(config *LoggingConfig) error {
 	return l.client.UpdateConfig(config)
 }
 

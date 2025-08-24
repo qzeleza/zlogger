@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"testing"
-
-	conf "kvasdns/internal/config"
 )
 
 // Константы теперь определены в message.go
@@ -244,7 +242,7 @@ func TestClientGetLogFile(t *testing.T) {
 		encoder:        json.NewEncoder(mockConn),
 		decoder:        json.NewDecoder(mockConn),
 		connected:      true,
-		config:         &conf.LoggingConfig{},           // Добавляем пустую конфигурацию
+		config:         &LoggingConfig{},                // Добавляем пустую конфигурацию
 		serviceLoggers: make(map[string]*ServiceLogger), // Инициализируем карту логгеров
 	}
 

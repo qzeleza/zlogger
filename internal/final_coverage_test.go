@@ -5,8 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
@@ -188,7 +186,7 @@ func TestLogClientUtilityFunctions(t *testing.T) {
 	tempDir := t.TempDir()
 	logFile := filepath.Join(tempDir, "utility_test.log")
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		LogFile:       logFile,
 		SocketPath:    filepath.Join(tempDir, "utility.sock"),
 		Level:         "DEBUG",

@@ -3,18 +3,16 @@ package logger
 import (
 	"os"
 	"testing"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
  * createTestConfig создает тестовую конфигурацию с временным лог-файлом
  * @param t *testing.T - тестовый контекст
  * @param socketPath string - путь к сокету
- * @return *conf.LoggingConfig - конфигурация логирования
+ * @return *LoggingConfig - конфигурация логирования
  * @return func() - функция очистки
  */
-func createTestConfigForCoverage(t *testing.T, socketPath string) (*conf.LoggingConfig, func()) {
+func createTestConfigForCoverage(t *testing.T, socketPath string) (*LoggingConfig, func()) {
 	// Создаем временный файл для логов
 	tempFile, err := os.CreateTemp("", "test-*.log")
 	if err != nil {
@@ -22,7 +20,7 @@ func createTestConfigForCoverage(t *testing.T, socketPath string) (*conf.Logging
 	}
 	_ = tempFile.Close()
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:      "DEBUG",
 		LogFile:    tempFile.Name(),
 		SocketPath: socketPath,

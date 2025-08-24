@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
@@ -21,7 +19,7 @@ func TestNewLogger(t *testing.T) {
 	socketPath := filepath.Join(tempDir, "test.sock")
 
 	// Тестируем создание с валидной конфигурацией
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		LogFile:    logFile,
 		SocketPath: socketPath,
 		Level:      "INFO",
@@ -50,7 +48,7 @@ func TestNewLogger(t *testing.T) {
 	}
 
 	// Тестируем создание с пустой конфигурацией
-	emptyConfig := &conf.LoggingConfig{}
+	emptyConfig := &LoggingConfig{}
 	emptyLogger, err := New(emptyConfig, []string{})
 	if err == nil {
 		t.Error("New должен вернуть ошибку с пустой конфигурацией")
@@ -139,7 +137,7 @@ func TestLogClientLogPanicExtended(t *testing.T) {
 func TestLogServerConfigValidation(t *testing.T) {
 	testCases := []struct {
 		name        string
-		config      *conf.LoggingConfig
+		config      *LoggingConfig
 		expectError bool
 	}{
 		{
@@ -149,7 +147,7 @@ func TestLogServerConfigValidation(t *testing.T) {
 		},
 		{
 			name: "пустой путь к файлу",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "",
 				SocketPath: "/tmp/test.sock",
 				Level:      "INFO",
@@ -158,7 +156,7 @@ func TestLogServerConfigValidation(t *testing.T) {
 		},
 		{
 			name: "пустой путь к сокету",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "/tmp/test.log",
 				SocketPath: "",
 				Level:      "INFO",
@@ -167,7 +165,7 @@ func TestLogServerConfigValidation(t *testing.T) {
 		},
 		{
 			name: "невалидный уровень логирования",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "/tmp/test.log",
 				SocketPath: "/tmp/test.sock",
 				Level:      "INVALID_LEVEL",
@@ -215,7 +213,7 @@ func TestLogServerHelperMethods(t *testing.T) {
 		file:        file,
 		currentSize: 0,
 		stats:       ServerStats{StartTime: time.Now()},
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			MaxFileSize: 1024 * 1024, // 1MB
 			MaxFiles:    3,
 		},
@@ -248,7 +246,7 @@ func TestLogServerHelperMethods(t *testing.T) {
 	}
 
 	// Тестируем rotateIfNeeded с MaxFiles = 1 (простая очистка)
-	server.config = &conf.LoggingConfig{
+	server.config = &LoggingConfig{
 		LogFile:     logFile,
 		MaxFiles:    1,
 		MaxFileSize: 1024,

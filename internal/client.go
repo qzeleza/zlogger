@@ -4,12 +4,11 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+
 	"net"
 	"os"
 	"sync"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 // Переменная для подмены в тестах
@@ -17,7 +16,7 @@ var netDialTimeout = net.DialTimeout
 
 // LogClient клиентская часть логгера для подключения к серверу
 type LogClient struct {
-	config         *conf.LoggingConfig       // Конфигурация клиента
+	config         *LoggingConfig            // Конфигурация клиента
 	conn           net.Conn                  // Соединение с сервером
 	encoder        *json.Encoder             // Энкодер для отправки JSON
 	decoder        *json.Decoder             // Декодер для чтения ответов
@@ -30,7 +29,7 @@ type LogClient struct {
 }
 
 // NewLogClient создает новый клиент логгера
-func NewLogClient(config *conf.LoggingConfig) (*LogClient, error) {
+func NewLogClient(config *LoggingConfig) (*LogClient, error) {
 	if config == nil {
 		return nil, fmt.Errorf("конфигурация не может быть nil")
 	}
@@ -272,7 +271,7 @@ func (c *LogClient) GetLogFile() string {
 }
 
 // UpdateConfig обновляет конфигурацию клиента
-func (c *LogClient) UpdateConfig(config *conf.LoggingConfig) error {
+func (c *LogClient) UpdateConfig(config *LoggingConfig) error {
 	// Проверяем на nil, чтобы избежать паники
 	if config == nil {
 		return fmt.Errorf("конфигурация не может быть nil")

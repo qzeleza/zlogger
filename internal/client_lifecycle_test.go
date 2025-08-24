@@ -10,8 +10,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 // TestClientPing проверяет проверку соединения
@@ -215,7 +213,7 @@ func TestReconnect(t *testing.T) {
 
 	// Создаем клиент с конфигурацией
 	client := &LogClient{
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			SocketPath: "/tmp/logger.sock",
 		},
 		connected: false,
@@ -263,7 +261,7 @@ func TestReconnectError(t *testing.T) {
 
 	// Создаем клиент с конфигурацией
 	client := &LogClient{
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			SocketPath: "/tmp/logger.sock",
 		},
 		connected: false,
@@ -333,7 +331,7 @@ func TestRecoverPanic(t *testing.T) {
 // TestClientUpdateConfig проверяет обновление конфигурации
 func TestClientUpdateConfig(t *testing.T) {
 	// Создаем клиент с начальной конфигурацией
-	initialConfig := &conf.LoggingConfig{
+	initialConfig := &LoggingConfig{
 		SocketPath: "/tmp/old.sock",
 		Level:      "INFO",
 	}
@@ -344,7 +342,7 @@ func TestClientUpdateConfig(t *testing.T) {
 	}
 
 	// Создаем новую конфигурацию
-	newConfig := &conf.LoggingConfig{
+	newConfig := &LoggingConfig{
 		SocketPath: "/tmp/new.sock",
 		Level:      "DEBUG",
 	}
@@ -366,7 +364,7 @@ func TestClientUpdateConfig(t *testing.T) {
 // TestUpdateConfigNil проверяет обработку nil-конфигурации при обновлении
 func TestUpdateConfigNil(t *testing.T) {
 	// Создаем клиент с начальной конфигурацией
-	initialConfig := &conf.LoggingConfig{
+	initialConfig := &LoggingConfig{
 		SocketPath: "/tmp/old.sock",
 		Level:      "INFO",
 	}

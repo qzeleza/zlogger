@@ -7,8 +7,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
@@ -18,7 +16,7 @@ import (
 func TestLogServerConfigValidationBoost(t *testing.T) {
 	testCases := []struct {
 		name        string
-		config      *conf.LoggingConfig
+		config      *LoggingConfig
 		expectError bool
 	}{
 		{
@@ -28,7 +26,7 @@ func TestLogServerConfigValidationBoost(t *testing.T) {
 		},
 		{
 			name: "пустой путь к файлу",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "",
 				SocketPath: "/tmp/test.sock",
 				Level:      "INFO",
@@ -37,7 +35,7 @@ func TestLogServerConfigValidationBoost(t *testing.T) {
 		},
 		{
 			name: "пустой путь к сокету",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "/tmp/test.log",
 				SocketPath: "",
 				Level:      "INFO",
@@ -46,7 +44,7 @@ func TestLogServerConfigValidationBoost(t *testing.T) {
 		},
 		{
 			name: "невалидный уровень логирования",
-			config: &conf.LoggingConfig{
+			config: &LoggingConfig{
 				LogFile:    "/tmp/test.log",
 				SocketPath: "/tmp/test.sock",
 				Level:      "НЕДОПУСТИМЫЙ_УРОВЕНЬ",
@@ -94,7 +92,7 @@ func TestLogServerHelperMethodsBoost(t *testing.T) {
 		file:        file,
 		currentSize: 0,
 		stats:       ServerStats{StartTime: time.Now()},
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			MaxFileSize: 1024 * 1024, // 1MB
 			MaxFiles:    3,
 		},
@@ -127,7 +125,7 @@ func TestLogServerHelperMethodsBoost(t *testing.T) {
 	}
 
 	// Тестируем rotateIfNeeded с MaxFiles = 1 (простая очистка)
-	server.config = &conf.LoggingConfig{
+	server.config = &LoggingConfig{
 		LogFile:     logFile,
 		MaxFiles:    1,
 		MaxFileSize: 1024,
@@ -168,7 +166,7 @@ func TestLogServerStatisticsBoost(t *testing.T) {
 			TotalClients:  0,
 			FileRotations: 0,
 		},
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			MaxFileSize: 1024 * 1024, // 1MB
 			MaxFiles:    3,
 		},
@@ -235,7 +233,7 @@ func TestLogServerMessageProcessingBoost(t *testing.T) {
 		file:        file,
 		currentSize: 0,
 		stats:       ServerStats{StartTime: time.Now()},
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			MaxFileSize: 1024 * 1024, // 1MB
 			MaxFiles:    3,
 		},
@@ -303,7 +301,7 @@ func TestLogServerBufferHandling(t *testing.T) {
 		file:        file,
 		currentSize: 0,
 		stats:       ServerStats{StartTime: time.Now()},
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			BufferSize:    3,
 			FlushInterval: time.Millisecond * 100,
 		},
@@ -377,7 +375,7 @@ func TestLogServerEdgeCases(t *testing.T) {
 		file:        file,
 		currentSize: 0,
 		stats:       ServerStats{StartTime: time.Now()},
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			MaxFileSize: 1024 * 1024, // 1MB
 			MaxFiles:    3,
 		},

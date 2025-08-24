@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"kvasdns/internal/config"
+
 	"net"
 	"os"
 	"path/filepath"
@@ -31,7 +31,7 @@ type LogServer struct {
 	stats ServerStats // Статистика сервера
 
 	// Основная конфигурация
-	config   *config.LoggingConfig
+	config   *LoggingConfig
 	file     *os.File
 	listener net.Listener
 
@@ -83,7 +83,7 @@ type ServerStats struct {
 
 // NewLogServer создает новый оптимизированный сервер логгера
 // Использует упрощенную конфигурацию + фиксированные оптимальные значения
-func NewLogServer(config *config.LoggingConfig) (*LogServer, error) {
+func NewLogServer(config *LoggingConfig) (*LogServer, error) {
 	// Проверка на nil конфигурацию
 	if config == nil {
 		return nil, fmt.Errorf("конфигурация не может быть nil")

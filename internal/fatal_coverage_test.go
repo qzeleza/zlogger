@@ -8,8 +8,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
@@ -24,7 +22,7 @@ func TestFatalFunctions(t *testing.T) {
 		logFile := filepath.Join(tempDir, "fatal_test.log")
 		socketPath := filepath.Join(tempDir, "fatal_test.sock")
 
-		config := &conf.LoggingConfig{
+		config := &LoggingConfig{
 			LogFile:       logFile,
 			SocketPath:    socketPath,
 			Level:         "INFO",
@@ -136,7 +134,7 @@ func TestServerFunctionsWithoutSocket(t *testing.T) {
 	logFile := filepath.Join(tempDir, "test.log")
 
 	// Создаем конфигурацию без сокета для тестирования отдельных функций
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		LogFile:       logFile,
 		SocketPath:    "", // Пустой путь к сокету
 		Level:         "INFO",
@@ -157,7 +155,7 @@ func TestServerFunctionsWithoutSocket(t *testing.T) {
 
 	// Тестируем функции форматирования и парсинга без полного сервера
 	// Создаем минимальный сервер для тестирования методов
-	validConfig := &conf.LoggingConfig{
+	validConfig := &LoggingConfig{
 		LogFile:       logFile,
 		SocketPath:    filepath.Join(tempDir, "test.sock"),
 		Level:         "INFO",

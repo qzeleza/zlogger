@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
@@ -19,7 +17,7 @@ func TestServerHelperFunctions(t *testing.T) {
 	tempDir := t.TempDir()
 	logFile := filepath.Join(tempDir, "test.log")
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		LogFile:       logFile,
 		SocketPath:    filepath.Join(tempDir, "test.sock"),
 		Level:         "INFO",
@@ -301,7 +299,7 @@ func TestLogClientUpdateConfig(t *testing.T) {
 	}
 
 	tempDir := t.TempDir()
-	newConfig := &conf.LoggingConfig{
+	newConfig := &LoggingConfig{
 		LogFile:       filepath.Join(tempDir, "new.log"),
 		SocketPath:    filepath.Join(tempDir, "new.sock"),
 		Level:         "ERROR",
@@ -338,7 +336,7 @@ func TestLogClientUpdateConfig(t *testing.T) {
  */
 func TestLogClientRecoverPanic(t *testing.T) {
 	tempDir := t.TempDir()
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		LogFile:       filepath.Join(tempDir, "panic.log"),
 		SocketPath:    filepath.Join(tempDir, "panic.sock"),
 		Level:         "DEBUG",

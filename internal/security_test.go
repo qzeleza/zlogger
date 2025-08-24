@@ -4,8 +4,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
@@ -262,7 +260,7 @@ func TestValidateMessage(t *testing.T) {
 func TestValidateConfig(t *testing.T) {
 	// Создаем валидную конфигурацию
 	tempDir := t.TempDir()
-	validConfig := &conf.LoggingConfig{
+	validConfig := &LoggingConfig{
 		Level:      "INFO",
 		LogFile:    tempDir + "/test.log",
 		SocketPath: tempDir + "/test.sock",
@@ -274,7 +272,7 @@ func TestValidateConfig(t *testing.T) {
 	}
 
 	// Тестируем конфигурацию с относительным путем к лог-файлу
-	invalidConfig1 := &conf.LoggingConfig{
+	invalidConfig1 := &LoggingConfig{
 		Level:      "INFO",
 		LogFile:    "relative/path/test.log", // относительный путь
 		SocketPath: tempDir + "/test.sock",
@@ -286,7 +284,7 @@ func TestValidateConfig(t *testing.T) {
 	}
 
 	// Тестируем конфигурацию с относительным путем к сокету
-	invalidConfig2 := &conf.LoggingConfig{
+	invalidConfig2 := &LoggingConfig{
 		Level:      "INFO",
 		LogFile:    tempDir + "/test.log",
 		SocketPath: "relative/path/test.sock", // относительный путь
@@ -298,7 +296,7 @@ func TestValidateConfig(t *testing.T) {
 	}
 
 	// Тестируем конфигурацию с пустым путем к лог-файлу
-	invalidConfig3 := &conf.LoggingConfig{
+	invalidConfig3 := &LoggingConfig{
 		Level:      "INFO",
 		LogFile:    "",
 		SocketPath: tempDir + "/test.sock",
@@ -310,7 +308,7 @@ func TestValidateConfig(t *testing.T) {
 	}
 
 	// Тестируем конфигурацию с пустым путем к сокету
-	invalidConfig4 := &conf.LoggingConfig{
+	invalidConfig4 := &LoggingConfig{
 		Level:      "INFO",
 		LogFile:    tempDir + "/test.log",
 		SocketPath: "",
@@ -322,7 +320,7 @@ func TestValidateConfig(t *testing.T) {
 	}
 
 	// Тестируем конфигурацию с опасными символами в пути
-	invalidConfig5 := &conf.LoggingConfig{
+	invalidConfig5 := &LoggingConfig{
 		Level:      "INFO",
 		LogFile:    tempDir + "/../test.log", // содержит ..
 		SocketPath: tempDir + "/test.sock",

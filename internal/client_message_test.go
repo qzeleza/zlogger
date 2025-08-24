@@ -11,8 +11,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 // Константы для тестирования
@@ -45,8 +43,8 @@ func TestSendMessage(t *testing.T) {
 		decoder:        json.NewDecoder(mockConn),
 		level:          DEBUG, // Устанавливаем уровень DEBUG, чтобы все сообщения проходили
 		connected:      true,
-		config:         &conf.LoggingConfig{SocketPath: "/tmp/test.sock"}, // Добавляем конфигурацию
-		serviceLoggers: make(map[string]*ServiceLogger),                   // Инициализируем карту сервисов
+		config:         &LoggingConfig{SocketPath: "/tmp/test.sock"}, // Добавляем конфигурацию
+		serviceLoggers: make(map[string]*ServiceLogger),              // Инициализируем карту сервисов
 	}
 
 	// Вызываем метод sendMessage
@@ -109,8 +107,8 @@ func TestSendMessageLevelFiltering(t *testing.T) {
 		decoder:        json.NewDecoder(mockConn),
 		level:          INFO, // Устанавливаем уровень INFO
 		connected:      true,
-		config:         &conf.LoggingConfig{SocketPath: "/tmp/test.sock"}, // Добавляем конфигурацию
-		serviceLoggers: make(map[string]*ServiceLogger),                   // Инициализируем карту сервисов
+		config:         &LoggingConfig{SocketPath: "/tmp/test.sock"}, // Добавляем конфигурацию
+		serviceLoggers: make(map[string]*ServiceLogger),              // Инициализируем карту сервисов
 	}
 
 	// Проверяем фильтрацию DEBUG сообщений
@@ -156,8 +154,8 @@ func TestSendMessageConnectionError(t *testing.T) {
 		decoder:        json.NewDecoder(mockConn),
 		level:          DEBUG,
 		connected:      true,
-		config:         &conf.LoggingConfig{SocketPath: "/tmp/test.sock"}, // Добавляем конфигурацию
-		serviceLoggers: make(map[string]*ServiceLogger),                   // Инициализируем карту сервисов
+		config:         &LoggingConfig{SocketPath: "/tmp/test.sock"}, // Добавляем конфигурацию
+		serviceLoggers: make(map[string]*ServiceLogger),              // Инициализируем карту сервисов
 	}
 
 	// Сохраняем оригинальный stderr и создаем буфер для перехвата
@@ -260,7 +258,7 @@ func TestSendMessageReconnect(t *testing.T) {
 
 	// Создаем клиент с первым моком соединения
 	client := &LogClient{
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			SocketPath: "/tmp/logger.sock",
 		},
 		conn:           failedConn,

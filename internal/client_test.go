@@ -7,8 +7,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 // mockConn мок для net.Conn
@@ -131,7 +129,7 @@ func TestNewLogClient(t *testing.T) {
 	}
 
 	// Создаем конфигурацию
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		SocketPath: "/tmp/logger.sock",
 		Level:      "info",
 	}
@@ -218,7 +216,7 @@ func TestNewLogClientConnectionError(t *testing.T) {
 	}
 
 	// Создаем конфигурацию
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		SocketPath: "/tmp/logger.sock",
 		Level:      "info",
 	}
@@ -252,7 +250,7 @@ func TestLogClientConnect(t *testing.T) {
 
 	// Создаем клиент без подключения
 	client := &LogClient{
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			SocketPath: "/tmp/logger.sock",
 		},
 		connected: false,
@@ -297,7 +295,7 @@ func TestLogClientConnectError(t *testing.T) {
 
 	// Создаем клиент без подключения
 	client := &LogClient{
-		config: &conf.LoggingConfig{
+		config: &LoggingConfig{
 			SocketPath: "/tmp/logger.sock",
 		},
 		connected: false,

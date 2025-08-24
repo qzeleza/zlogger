@@ -13,18 +13,16 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	conf "kvasdns/internal/config"
 )
 
 /**
  * createTestConfig создает тестовую конфигурацию с временным лог-файлом
  * @param t *testing.T - тестовый контекст
  * @param socketPath string - путь к сокету
- * @return *conf.LoggingConfig - конфигурация для тестов
+ * @return *LoggingConfig - конфигурация для тестов
  * @return func() - функция очистки (удаления временного файла)
  */
-func createTestConfig(t *testing.T, socketPath string) (*conf.LoggingConfig, func()) {
+func createTestConfig(t *testing.T, socketPath string) (*LoggingConfig, func()) {
 	// Создаем временный файл для логов
 	logFile, err := os.CreateTemp("", "integration_test_*.log")
 	if err != nil {
@@ -38,7 +36,7 @@ func createTestConfig(t *testing.T, socketPath string) (*conf.LoggingConfig, fun
 	}
 
 	// Создаем конфигурацию
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:         "DEBUG",
 		LogFile:       logFile.Name(),
 		SocketPath:    socketPath,
@@ -191,7 +189,7 @@ func TestConcurrentLogging(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	defer server.Stop()
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: socketPath,
 		Services:   []string{"MAIN"},
@@ -383,7 +381,7 @@ func TestReconnection(t *testing.T) {
 	go server1.Start()
 	time.Sleep(100 * time.Millisecond)
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: socketPath,
 		Services:   []string{"MAIN"},
@@ -443,7 +441,7 @@ func TestReconnection(t *testing.T) {
 
 // TestLoggerWithInvalidSocket проверяет поведение при недоступном сокете
 func TestLoggerWithInvalidSocket(t *testing.T) {
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: "/nonexistent/path/logger.sock",
 		Services:   []string{"MAIN"},
@@ -474,7 +472,7 @@ func TestLoggerPing(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	defer server.Stop()
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: socketPath,
 		Services:   []string{"MAIN"},
@@ -511,7 +509,7 @@ func TestGetLogEntries(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	defer server.Stop()
 
-	config := &conf.LoggingConfig{
+	config := &LoggingConfig{
 		Level:      "INFO",
 		SocketPath: socketPath,
 		Services:   []string{"MAIN"},
