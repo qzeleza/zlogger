@@ -506,8 +506,20 @@ func (s *LogServer) handleClient(conn net.Conn, clientID string) {
 			case MsgTypeUpdateLevel:
 				s.handleUpdateLevel(protocolMsg.Data, encoder)
 
+			case MsgTypeSetLevel:
+				// Обрабатываем так же, как и MsgTypeUpdateLevel, так как они выполняют одинаковую функцию
+				s.handleUpdateLevel(protocolMsg.Data, encoder)
+
 			case MsgTypePing:
 				s.handlePing(encoder)
+
+			case MsgTypeGetLogFile:
+				// Обработка запроса на получение пути к файлу лога
+				response := ProtocolMessage{
+					Type: MsgTypeLogFile,
+					Data: s.config.LogFile,
+				}
+				_ = encoder.Encode(response)
 
 			default:
 				s.sendError(encoder, fmt.Sprintf("Неизвестный тип сообщения: %s", protocolMsg.Type))
