@@ -115,27 +115,32 @@ func ParseLevel(level string) (LogLevel, error) {
 // Глобальные функции для быстрого логирования без создания экземпляра
 // Используют простой вывод в stdout/stderr
 
-// Debugf выводит форматированное отладочное сообщение
-func Debug(format string, args ...interface{}) {
-	logger.Debugf(format, args...)
+// Debug выводит отладочное сообщение с поддержкой различных типов аргументов
+func Debug(args ...interface{}) {
+	logger.Debug(args...)
 }
 
-// Infof выводит форматированное информационное сообщение
-func Info(format string, args ...interface{}) {
-	logger.Infof(format, args...)
+// Info выводит информационное сообщение с поддержкой различных типов аргументов
+func Info(args ...interface{}) {
+	logger.Info(args...)
 }
 
-// Warnf выводит форматированное предупреждение
-func Warn(format string, args ...interface{}) {
-	logger.Warnf(format, args...)
+// Warn выводит предупреждение с поддержкой различных типов аргументов
+func Warn(args ...interface{}) {
+	logger.Warn(args...)
 }
 
-// Errorf выводит форматированное сообщение об ошибке
-func Error(format string, args ...interface{}) {
-	logger.Errorf(format, args...)
+// Error выводит сообщение об ошибке с поддержкой различных типов аргументов
+func Error(args ...interface{}) {
+	logger.Error(args...)
 }
 
-// Fatalf выводит форматированное критическое сообщение
-func Fatal(format string, args ...interface{}) {
-	logger.Fatalf(format, args...)
+// Fatal выводит критическое сообщение с поддержкой различных типов аргументов
+func Fatal(args ...interface{}) {
+	logger.Fatal(args...)
+}
+
+// Panic выводит сообщение паники с поддержкой различных типов аргументов
+func Panic(args ...interface{}) {
+	logger.Panic(args...)
 }

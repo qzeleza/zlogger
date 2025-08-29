@@ -29,76 +29,54 @@ func newServiceLogger(client LogClientInterface, service string) *ServiceLogger 
 	}
 }
 
-// Debug записывает debug сообщение
-func (s *ServiceLogger) Debug(message string) error {
-	return s.client.sendMessage(s.service, DEBUG, message)
+// Debug записывает debug сообщение с поддержкой различных типов аргументов
+func (s *ServiceLogger) Debug(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return s.client.sendMessage(s.service, DEBUG, message, fields)
 }
 
-// Info записывает info сообщение
-func (s *ServiceLogger) Info(message string) error {
-	return s.client.sendMessage(s.service, INFO, message)
+// Info записывает info сообщение с поддержкой различных типов аргументов
+func (s *ServiceLogger) Info(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return s.client.sendMessage(s.service, INFO, message, fields)
 }
 
-// Warn записывает warning сообщение
-func (s *ServiceLogger) Warn(message string) error {
-	return s.client.sendMessage(s.service, WARN, message)
+// Warn записывает warning сообщение с поддержкой различных типов аргументов
+func (s *ServiceLogger) Warn(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return s.client.sendMessage(s.service, WARN, message, fields)
 }
 
-// Error записывает error сообщение
-func (s *ServiceLogger) Error(message string) error {
-	return s.client.sendMessage(s.service, ERROR, message)
+// Error записывает error сообщение с поддержкой различных типов аргументов
+func (s *ServiceLogger) Error(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return s.client.sendMessage(s.service, ERROR, message, fields)
 }
 
 // Fatal записывает fatal сообщение и завершает программу
-func (s *ServiceLogger) Fatal(message string) error {
+func (s *ServiceLogger) Fatal(args ...interface{}) error {
+	// Обрабатываем аргументы
+	message, fields := processArgs(args...)
+
 	// Немедленный вывод в stderr, чтобы тесты могли обнаружить "fatal"
 	serviceFormatted := fmt.Sprintf("%-5s", s.service)
 	levelFormatted := fmt.Sprintf("%-5s", FATAL.String())
 	fmt.Fprintf(os.Stderr, "[%s] %s [%s] \"%s\"\n", serviceFormatted, time.Now().Format(DEFAULT_TIME_FORMAT), levelFormatted, message)
 
-	_ = s.client.sendMessage(s.service, FATAL, message)
+	_ = s.client.sendMessage(s.service, FATAL, message, fields)
 	fmt.Fprintln(os.Stderr, "fatal")
 	os.Exit(1)
 	return nil
 }
 
 // Panic записывает panic сообщение и вызывает панику
-func (s *ServiceLogger) Panic(message string) error {
-	_ = s.client.sendMessage(s.service, PANIC, message)
-	panic(message)
-}
-
-// Форматированные функции
-func (s *ServiceLogger) Debugf(format string, args ...interface{}) error {
-	return s.client.sendMessage(s.service, DEBUG, fmt.Sprintf(format, args...))
-}
-
-func (s *ServiceLogger) Infof(format string, args ...interface{}) error {
-	return s.client.sendMessage(s.service, INFO, fmt.Sprintf(format, args...))
-}
-
-func (s *ServiceLogger) Warnf(format string, args ...interface{}) error {
-	return s.client.sendMessage(s.service, WARN, fmt.Sprintf(format, args...))
-}
-
-func (s *ServiceLogger) Errorf(format string, args ...interface{}) error {
-	return s.client.sendMessage(s.service, ERROR, fmt.Sprintf(format, args...))
-}
-
-func (s *ServiceLogger) Fatalf(format string, args ...interface{}) error {
-	message := fmt.Sprintf(format, args...)
-	serviceFormatted := fmt.Sprintf("%-5s", s.service)
-	levelFormatted := fmt.Sprintf("%-5s", FATAL.String())
-	fmt.Fprintf(os.Stderr, "[%s] %s [%s] \"%s\"\n", serviceFormatted, time.Now().Format(DEFAULT_TIME_FORMAT), levelFormatted, message)
-
-	_ = s.client.sendMessage(s.service, FATAL, message)
-	fmt.Fprintln(os.Stderr, "fatal")
-	os.Exit(1)
-	return nil
-}
-
-func (s *ServiceLogger) Panicf(format string, args ...interface{}) error {
-	message := fmt.Sprintf(format, args...)
-	_ = s.client.sendMessage(s.service, PANIC, message)
+func (s *ServiceLogger) Panic(args ...interface{}) error {
+	// Обрабатываем аргументы
+	message, fields := processArgs(args...)
+	_ = s.client.sendMessage(s.service, PANIC, message, fields)
 	panic(message)
 }

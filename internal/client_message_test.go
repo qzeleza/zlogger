@@ -52,7 +52,7 @@ func TestSendMessage(t *testing.T) {
 	level := INFO
 	message := "test message"
 
-	err := client.sendMessage(service, level, message)
+	err := client.sendMessage(service, level, message, nil)
 
 	// Проверяем результаты
 	if err != nil {
@@ -112,7 +112,7 @@ func TestSendMessageLevelFiltering(t *testing.T) {
 	}
 
 	// Проверяем фильтрацию DEBUG сообщений
-	err := client.sendMessage("TEST", DEBUG, "debug message")
+	err := client.sendMessage("TEST", DEBUG, "debug message", nil)
 
 	// DEBUG сообщение должно быть отфильтровано
 	if err != nil {
@@ -128,7 +128,7 @@ func TestSendMessageLevelFiltering(t *testing.T) {
 	// Проверяем, что INFO сообщение проходит
 	mockConn.SetReadData([]byte(`{"Type":"ack","Data":"OK"}` + "\n"))
 
-	err = client.sendMessage("TEST", INFO, "info message")
+	err = client.sendMessage("TEST", INFO, "info message", nil)
 
 	if err != nil {
 		t.Errorf("ожидалась успешная отправка INFO сообщения, получена ошибка: %v", err)
@@ -164,7 +164,7 @@ func TestSendMessageConnectionError(t *testing.T) {
 	os.Stderr = w
 
 	// Вызываем метод sendMessage
-	err := client.sendMessage("TEST", INFO, "test message")
+	err := client.sendMessage("TEST", INFO, "test message", nil)
 
 	// Закрываем pipe и восстанавливаем stderr
 	_ = w.Close()
@@ -207,7 +207,7 @@ func TestFallbackToStderr(t *testing.T) {
 	message := "error message"
 	timestamp := time.Now()
 
-	client.fallbackToStderr(service, level, message, timestamp)
+	client.fallbackToStderr(service, level, message, timestamp, nil)
 
 	// Закрываем pipe и восстанавливаем stderr
 	_ = w.Close()
@@ -270,7 +270,7 @@ func TestSendMessageReconnect(t *testing.T) {
 	}
 
 	// Вызываем метод sendMessage
-	err := client.sendMessage("TEST", INFO, "test message")
+	err := client.sendMessage("TEST", INFO, "test message", nil)
 
 	// Проверяем результаты
 	if err != nil {

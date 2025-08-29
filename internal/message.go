@@ -29,11 +29,12 @@ import (
 
 // LogMessage структура сообщения лога с оптимизацией памяти
 type LogMessage struct {
-	Service   string    `json:"service"`             // Название сервиса
-	Level     LogLevel  `json:"level"`               // Уровень логирования
-	Message   string    `json:"message"`             // Текст сообщения
-	Timestamp time.Time `json:"timestamp"`           // Время создания
-	ClientID  string    `json:"client_id,omitempty"` // Идентификатор клиента
+	Service   string            `json:"service"`             // Название сервиса
+	Level     LogLevel          `json:"level"`               // Уровень логирования
+	Message   string            `json:"message"`             // Текст сообщения
+	Timestamp time.Time         `json:"timestamp"`           // Время создания
+	ClientID  string            `json:"client_id,omitempty"` // Идентификатор клиента
+	Fields    map[string]string `json:"fields,omitempty"`    // Дополнительные поля для структурированного логирования
 }
 
 // LogEntry структура записи лога для чтения с кешированием
@@ -119,6 +120,7 @@ func PutLogMessage(msg *LogMessage) {
 	msg.Message = ""
 	msg.ClientID = ""
 	msg.Timestamp = time.Time{}
+	msg.Fields = nil // Очищаем дополнительные поля
 	logMessagePool.Put(msg)
 }
 

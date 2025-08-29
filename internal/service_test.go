@@ -106,7 +106,7 @@ func TestServiceLoggerMethods(t *testing.T) {
 	}
 }
 
-// TestServiceLoggerFormattedMethods проверяет форматированные методы
+// TestServiceLoggerFormattedMethods проверяет форматированные методы с вариативными аргументами
 func TestServiceLoggerFormattedMethods(t *testing.T) {
 	mockClient := &MockLogClient{}
 	service := "DNS"
@@ -116,35 +116,33 @@ func TestServiceLoggerFormattedMethods(t *testing.T) {
 		name     string
 		method   func() error
 		level    LogLevel
-		format   string
-		args     []interface{}
 		expected string
 		wantErr  bool
 	}{
 		{
-			name:     "Debugf",
-			method:   func() error { return serviceLogger.Debugf("debug: %s %d", "test", 123) },
+			name:     "Debug с форматированием",
+			method:   func() error { return serviceLogger.Debug(fmt.Sprintf("debug: %s %d", "test", 123)) },
 			level:    DEBUG,
 			expected: "debug: test 123",
 			wantErr:  false,
 		},
 		{
-			name:     "Infof",
-			method:   func() error { return serviceLogger.Infof("info: %v", map[string]int{"count": 5}) },
+			name:     "Info с форматированием",
+			method:   func() error { return serviceLogger.Info(fmt.Sprintf("info: %v", map[string]int{"count": 5})) },
 			level:    INFO,
 			expected: "info: map[count:5]",
 			wantErr:  false,
 		},
 		{
-			name:     "Warnf",
-			method:   func() error { return serviceLogger.Warnf("warn: %.2f%%", 85.67) },
+			name:     "Warn с форматированием",
+			method:   func() error { return serviceLogger.Warn(fmt.Sprintf("warn: %.2f%%", 85.67)) },
 			level:    WARN,
 			expected: "warn: 85.67%",
 			wantErr:  false,
 		},
 		{
-			name:     "Errorf",
-			method:   func() error { return serviceLogger.Errorf("error: %t", true) },
+			name:     "Error с форматированием",
+			method:   func() error { return serviceLogger.Error(fmt.Sprintf("error: %t", true)) },
 			level:    ERROR,
 			expected: "error: true",
 			wantErr:  false,
@@ -197,7 +195,7 @@ func TestServiceLoggerFatal(t *testing.T) {
 
 	// Мы не можем вызвать реальный Fatal из-за os.Exit(1)
 	// Вместо этого тестируем логику отправки сообщения напрямую
-	err := mockClient.sendMessage(service, FATAL, "fatal error")
+	err := mockClient.sendMessage(service, FATAL, "fatal error", nil)
 
 	if err != nil {
 		t.Errorf("неожиданная ошибка при отправке FATAL сообщения: %v", err)
@@ -229,7 +227,7 @@ func TestServiceLoggerPanic(t *testing.T) {
 
 	// Мы не можем вызвать реальный Panic из-за panic()
 	// Вместо этого тестируем логику отправки сообщения напрямую
-	err := mockClient.sendMessage(service, PANIC, "panic error")
+	err := mockClient.sendMessage(service, PANIC, "panic error", nil)
 
 	if err != nil {
 		t.Errorf("неожиданная ошибка при отправке PANIC сообщения: %v", err)
@@ -337,14 +335,14 @@ func BenchmarkServiceLoggerInfo(b *testing.B) {
 	}
 }
 
-// BenchmarkServiceLoggerInfof бенчмарк для метода Infof
-func BenchmarkServiceLoggerInfof(b *testing.B) {
+// BenchmarkServiceLoggerInfoFormatted бенчмарк для метода Info с форматированием
+func BenchmarkServiceLoggerInfoFormatted(b *testing.B) {
 	mockClient := &MockLogClient{}
 	serviceLogger := newServiceLogger(mockClient, "BENCH")
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = serviceLogger.Infof("benchmark message %d", i)
+		_ = serviceLogger.Info("benchmark message %d", i)
 	}
 }
 
@@ -439,7 +437,7 @@ func TestServiceLoggerFatalMethod(t *testing.T) {
 	// Создаем отдельную функцию для тестирования логики без os.Exit
 	testFatalLogic := func(message string) {
 		// Имитируем только часть с sendMessage
-		_ = serviceLogger.client.sendMessage(service, FATAL, message)
+		_ = serviceLogger.client.sendMessage(service, FATAL, message, nil)
 	}
 
 	message := "fatal error occurred"
@@ -466,24 +464,24 @@ func TestServiceLoggerFatalMethod(t *testing.T) {
 	}
 }
 
-// TestServiceLoggerFatalfMethod проверяет метод Fatalf (имитация без os.Exit)
-func TestServiceLoggerFatalfMethod(t *testing.T) {
+// TestServiceLoggerFatalFormatted проверяет метод Fatal с форматированием (имитация без os.Exit)
+func TestServiceLoggerFatalFormatted(t *testing.T) {
 	mockClient := &MockLogClient{}
-	service := "FATALF_TEST"
+	service := "FATAL_FORMAT_TEST"
 	serviceLogger := newServiceLogger(mockClient, service)
 
 	// Аналогично Fatal, тестируем только логику форматирования и sendMessage
-	testFatalfLogic := func(format string, args ...interface{}) {
-		// Имитируем логику Fatalf без os.Exit
-		message := fmt.Sprintf(format, args...)
-		_ = serviceLogger.client.sendMessage(service, FATAL, message)
+	testFatalLogic := func(formatStr string, args ...interface{}) {
+		// Имитируем логику Fatal с форматированием без os.Exit
+		message := fmt.Sprintf(formatStr, args...)
+		_ = serviceLogger.client.sendMessage(service, FATAL, message, nil)
 	}
 
 	format := "fatal error: %s with code %d"
 	args := []interface{}{"соединение не удалось", 500}
 	expectedMessage := "fatal error: соединение не удалось with code 500"
 
-	testFatalfLogic(format, args...)
+	testFatalLogic(format, args...)
 
 	// Проверяем, что sendMessage был вызван с правильными параметрами
 	if len(mockClient.calls) != 1 {
@@ -507,7 +505,7 @@ func TestServiceLoggerFatalfMethod(t *testing.T) {
 
 	// Дополнительный тест с пустыми аргументами
 	mockClient.Reset()
-	testFatalfLogic("simple fatal message")
+	testFatalLogic("simple fatal message")
 
 	if len(mockClient.calls) != 1 {
 		t.Errorf("ожидался 1 вызов для простого сообщения, получили %d", len(mockClient.calls))

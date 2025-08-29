@@ -222,11 +222,11 @@ func TestLogClientUtilityFunctions(t *testing.T) {
 	_ = client.Warn("warning message")
 	_ = client.Error("error message")
 
-	// Тестируем форматированные методы
-	_ = client.Debugf("debug %s %d", "formatted", 123)
-	_ = client.Infof("info %s %d", "formatted", 456)
-	_ = client.Warnf("warning %s %d", "formatted", 789)
-	_ = client.Errorf("error %s %d", "formatted", 999)
+	// Тестируем методы с форматированием
+	_ = client.Debug("debug %s %d", "formatted", 123)
+	_ = client.Info("info %s %d", "formatted", 456)
+	_ = client.Warn("warning %s %d", "formatted", 789)
+	_ = client.Error("error %s %d", "formatted", 999)
 }
 
 /**
@@ -289,11 +289,11 @@ func TestServiceLoggerMethodsExtended(t *testing.T) {
 	_ = serviceLogger.Warn("extended warning message")
 	_ = serviceLogger.Error("extended error message")
 
-	// Тестируем форматированные методы с различными типами аргументов
-	_ = serviceLogger.Debugf("debug %s %d %t", "test", 123, true)
-	_ = serviceLogger.Infof("info %v", []string{"a", "b", "c"})
-	_ = serviceLogger.Warnf("warning %.2f", 3.14159)
-	_ = serviceLogger.Errorf("error %x", 255)
+	// Тестируем методы с форматированием и различными типами аргументов
+	_ = serviceLogger.Debug("debug %s %d %t", "test", 123, true)
+	_ = serviceLogger.Info("info %v", []string{"a", "b", "c"})
+	_ = serviceLogger.Warn("warning %.2f", 3.14159)
+	_ = serviceLogger.Error("error %x", 255)
 
 	// Проверяем, что мок-клиент получил вызовы
 	// (детальная проверка зависит от реализации MockLogClient)

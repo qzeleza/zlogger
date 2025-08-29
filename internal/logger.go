@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var _ API = (*Logger)(nil) // compile-time guarantee
+var _ API = (*Logger)(nil) // Убедимся, что Logger соответствует интерфейсу API
 
 // Logger основная структура логгера для клиентских приложений
 type Logger struct {
@@ -124,72 +124,38 @@ func (l *Logger) Close() error {
 }
 
 // Методы для MAIN сервиса
-func (l *Logger) Debug(message string, args ...interface{}) error {
-	if len(args) > 0 {
-		return l.client.Debugf(message, args...)
-	}
-	return l.client.Debug(message)
+func (l *Logger) Debug(args ...interface{}) error {
+	// Используем универсальный метод Debug
+	return l.client.Debug(args...)
 }
 
-func (l *Logger) Info(message string, args ...interface{}) error {
-	if len(args) > 0 {
-		return l.client.Infof(message, args...)
-	}
-	return l.client.Info(message)
+func (l *Logger) Info(args ...interface{}) error {
+	// Используем универсальный метод Info
+	return l.client.Info(args...)
 }
 
-func (l *Logger) Warn(message string, args ...interface{}) error {
-	if len(args) > 0 {
-		return l.client.Warnf(message, args...)
-	}
-	return l.client.Warn(message)
+func (l *Logger) Warn(args ...interface{}) error {
+	// Используем универсальный метод Warn
+	return l.client.Warn(args...)
 }
 
-func (l *Logger) Error(message string, args ...interface{}) error {
-	if len(args) > 0 {
-		return l.client.Errorf(message, args...)
-	}
-	return l.client.Error(message)
+func (l *Logger) Error(args ...interface{}) error {
+	// Используем универсальный метод Error
+	return l.client.Error(args...)
 }
 
-func (l *Logger) Fatal(message string, args ...interface{}) error {
-	if len(args) > 0 {
-		return l.client.Fatalf(message, args...)
-	}
-	return l.client.Fatal(message)
+func (l *Logger) Fatal(args ...interface{}) error {
+	// Используем универсальный метод Fatal
+	return l.client.Fatal(args...)
 }
 
-func (l *Logger) Panic(message string, args ...interface{}) error {
-	if len(args) > 0 {
-		return l.client.Panicf(message, args...)
-	}
-	return l.client.Panic(message)
+func (l *Logger) Panic(args ...interface{}) error {
+	// Используем универсальный метод Panic
+	return l.client.Panic(args...)
 }
 
-// Форматированные методы для MAIN сервиса
-func (l *Logger) Debugf(format string, args ...interface{}) error {
-	return l.client.Debugf(format, args...)
-}
-
-func (l *Logger) Infof(format string, args ...interface{}) error {
-	return l.client.Infof(format, args...)
-}
-
-func (l *Logger) Warnf(format string, args ...interface{}) error {
-	return l.client.Warnf(format, args...)
-}
-
-func (l *Logger) Errorf(format string, args ...interface{}) error {
-	return l.client.Errorf(format, args...)
-}
-
-func (l *Logger) Fatalf(format string, args ...interface{}) error {
-	return l.client.Fatalf(format, args...)
-}
-
-func (l *Logger) Panicf(format string, args ...interface{}) error {
-	return l.client.Panicf(format, args...)
-}
+// Форматированные методы для MAIN сервиса теперь используют универсальные методы
+// Например: Debug(format, args...) вместо Debugf(format, args...)
 
 // waitForSocket ждет готовности unix сокета с таймаутом
 func waitForSocket(socketPath string, timeout time.Duration) error {

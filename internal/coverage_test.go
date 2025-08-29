@@ -150,10 +150,10 @@ func TestLogClientDirectMethods(t *testing.T) {
 		{"Info", func() error { return client.Info("test info") }},
 		{"Warn", func() error { return client.Warn("test warn") }},
 		{"Error", func() error { return client.Error("test error") }},
-		{"Debugf", func() error { return client.Debugf("test %s", "debug") }},
-		{"Infof", func() error { return client.Infof("test %s", "info") }},
-		{"Warnf", func() error { return client.Warnf("test %s", "warn") }},
-		{"Errorf", func() error { return client.Errorf("test %s", "error") }},
+		{"Debug с форматированием", func() error { return client.Debug("test %s", "debug") }},
+		{"Info с форматированием", func() error { return client.Info("test %s", "info") }},
+		{"Warn с форматированием", func() error { return client.Warn("test %s", "warn") }},
+		{"Error с форматированием", func() error { return client.Error("test %s", "error") }},
 	}
 
 	for _, method := range methods {
@@ -218,8 +218,8 @@ func TestLogClientFatalPanic(t *testing.T) {
 		_ = client.Panic("test panic")
 	})
 
-	t.Run("Fatalf", func(t *testing.T) {
-		// Тестируем Fatal метод (не можем перехватить os.Exit в тестах)
+	t.Run("Fatal с форматированием", func(t *testing.T) {
+		// Тестируем Fatal метод с форматированием (не можем перехватить os.Exit в тестах)
 		// Просто проверяем, что метод не паникует
 		defer func() {
 			if r := recover(); r != nil {
@@ -227,19 +227,19 @@ func TestLogClientFatalPanic(t *testing.T) {
 			}
 		}()
 
-		// Fatalf вызывает os.Exit, что завершает программу
+		// Fatal с форматированием вызывает os.Exit, что завершает программу
 		// В тестах мы не можем это проверить напрямую
-		t.Skip("Fatalf вызывает os.Exit, что завершает программу")
+		t.Skip("Fatal с форматированием вызывает os.Exit, что завершает программу")
 	})
 
-	t.Run("Panicf", func(t *testing.T) {
+	t.Run("Panic с форматированием", func(t *testing.T) {
 		defer func() {
 			if r := recover(); r == nil {
-				t.Error("Panicf должен вызвать панику")
+				t.Error("Panic с форматированием должен вызвать панику")
 			}
 		}()
 
-		_ = client.Panicf("test %s", "panic")
+		_ = client.Panic("test %s", "panic")
 	})
 }
 
@@ -300,14 +300,14 @@ func TestLoggerFatalPanic(t *testing.T) {
 		t.Skip("Fatalf вызывает os.Exit, что завершает программу")
 	})
 
-	t.Run("Panicf", func(t *testing.T) {
+	t.Run("Panic с форматированием", func(t *testing.T) {
 		defer func() {
 			if r := recover(); r == nil {
-				t.Error("Panicf должен вызвать панику")
+				t.Error("Panic с форматированием должен вызвать панику")
 			}
 		}()
 
-		_ = logger.Panicf("test %s", "panic")
+		_ = logger.Panic("test %s", "panic")
 	})
 }
 
@@ -458,14 +458,14 @@ func TestServiceLoggerFatalPanic(t *testing.T) {
 		t.Skip("Fatalf вызывает os.Exit, что завершает программу")
 	})
 
-	t.Run("Panicf", func(t *testing.T) {
+	t.Run("Panic с форматированием", func(t *testing.T) {
 		defer func() {
 			if r := recover(); r == nil {
-				t.Error("Panicf должен вызвать панику")
+				t.Error("Panic с форматированием должен вызвать панику")
 			}
 		}()
 
-		_ = serviceLogger.Panicf("test %s", "panic")
+		_ = serviceLogger.Panic("test %s", "panic")
 	})
 }
 

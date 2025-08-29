@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -387,12 +388,30 @@ func (s *LogServer) flushBatch() {
 
 // formatMessageAsTXT форматирует сообщение в простой TXT формат для файла лога
 // Формат: [SERVICE] YYYY-MM-DD HH:MM:SS [LEVEL] "MESSAGE"
+// Если есть дополнительные поля, они выводятся с отступом на новых строках
 func (s *LogServer) formatMessageAsTXT(msg LogMessage) string {
 	service := fmt.Sprintf("%-*s", s.maxServiceLen, msg.Service)
 	level := fmt.Sprintf("%-*s", s.maxLevelLen, msg.Level.String())
 	timeStr := msg.Timestamp.Format(DEFAULT_TIME_FORMAT) // Фиксированный формат времени
 
-	return fmt.Sprintf("[%s] %s [%s] \"%s\"", service, timeStr, level, msg.Message)
+	result := fmt.Sprintf("[%s] %s [%s] \"%s\"", service, timeStr, level, msg.Message)
+	
+	// Если есть дополнительные поля, добавляем их с отступом
+	if len(msg.Fields) > 0 {
+		keys := make([]string, 0, len(msg.Fields))
+		for k := range msg.Fields {
+			keys = append(keys, k)
+		}
+		
+		// Сортируем ключи для стабильного вывода
+		sort.Strings(keys)
+		
+		for _, k := range keys {
+			result += fmt.Sprintf("\n    %s: %s", k, msg.Fields[k])
+		}
+	}
+	
+	return result
 }
 
 // connectionHandler обрабатывает входящие соединения с защитой от DoS

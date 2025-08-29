@@ -48,7 +48,7 @@ func TestFatalFunctions(t *testing.T) {
 			case "Fatal":
 				_ = client.Fatal("test fatal message")
 			case "Fatalf":
-				_ = client.Fatalf("test fatal message: %s", "formatted")
+				_ = client.Fatal("test fatal message: %s", "formatted")
 			case "ServiceFatal":
 				// Тестируем Fatal из service.go
 				serviceLogger := &ServiceLogger{
@@ -57,12 +57,12 @@ func TestFatalFunctions(t *testing.T) {
 				}
 				_ = serviceLogger.Fatal("test service fatal")
 			case "ServiceFatalf":
-				// Тестируем Fatalf из service.go
+				// Тестируем Fatal с форматированием из service.go
 				serviceLogger := &ServiceLogger{
 					client:  client,
 					service: "TEST",
 				}
-				_ = serviceLogger.Fatalf("test service fatal: %s", "formatted")
+				_ = serviceLogger.Fatal("test service fatal: %s", "formatted")
 			}
 			return
 		}
@@ -72,13 +72,13 @@ func TestFatalFunctions(t *testing.T) {
 		case "Fatal":
 			_ = logger.Fatal("test fatal message")
 		case "Fatalf":
-			_ = logger.Fatalf("test fatal message: %s", "formatted")
+			_ = logger.Fatal("test fatal message: %s", "formatted")
 		case "ServiceFatal":
 			serviceLogger := logger.SetService("TEST")
 			_ = serviceLogger.Fatal("test service fatal")
 		case "ServiceFatalf":
 			serviceLogger := logger.SetService("TEST")
-			_ = serviceLogger.Fatalf("test service fatal: %s", "formatted")
+			_ = serviceLogger.Fatal("test service fatal: %s", "formatted")
 		}
 		return
 	}

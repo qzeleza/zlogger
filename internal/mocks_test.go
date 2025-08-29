@@ -15,20 +15,33 @@ func (e *MockError) Error() string {
 	return e.message
 }
 
-// MockLogClient мок клиента логгера для unit тестов
+// MockLogClient мок-реализация клиента логгера для тестов
 type MockLogClient struct {
-	mu                sync.Mutex
-	calls             []MockCall
-	level             LogLevel
-	closed            bool
-	logFile           string
-	pingError         error
-	logEntries        []LogEntry
-	serviceLoggers    map[string]*ServiceLogger
-	config            *LoggingConfig
-	connected         bool
-	customSendMessage func(service string, level LogLevel, message string) error
+	mu                 sync.Mutex
+	messages           []LogMessage
+	serviceLoggers     map[string]*ServiceLogger
+	level              LogLevel
+	config             *LoggingConfig
+	connected          bool
+	failConnect        bool
+	failSend           bool
+	failSetServerLevel bool
+	failGetLogEntries  bool
+	failPing           bool
+	failClose          bool
+	failGetLogFile     bool
+	failUpdateConfig   bool
+	customSendMessage  func(service string, level LogLevel, message string, fields map[string]string) error
+	// Добавляем недостающие поля
+	calls      []MockCall
+	closed     bool
+	logFile    string
+	logEntries []LogEntry
+	pingError  error
 }
+
+// Проверка, что MockLogClient реализует интерфейс LogClientInterface
+var _ LogClientInterface = (*MockLogClient)(nil)
 
 // MockCall структура для отслеживания вызовов методов
 type MockCall struct {
@@ -37,6 +50,7 @@ type MockCall struct {
 	Level   LogLevel
 	Message string
 	Args    []interface{}
+	Fields  map[string]string
 }
 
 // Reset сбрасывает состояние мока
@@ -162,73 +176,64 @@ func (m *MockLogClient) Close() error {
 }
 
 // sendMessage отправляет сообщение (мок)
-func (m *MockLogClient) sendMessage(service string, level LogLevel, message string) error {
+func (m *MockLogClient) sendMessage(service string, level LogLevel, message string, fields map[string]string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	m.calls = append(m.calls, MockCall{
-		Method:  "sendMessage",
+		Method:  "sendMessage", // Добавляем название метода
 		Service: service,
 		Level:   level,
 		Message: message,
+		Fields:  fields,
 	})
 
 	// Используем пользовательскую функцию, если она задана
 	if m.customSendMessage != nil {
-		return m.customSendMessage(service, level, message)
+		return m.customSendMessage(service, level, message, fields)
 	}
 	return nil
 }
 
 // Методы логирования для MAIN сервиса (моки)
-func (m *MockLogClient) Debug(message string) error {
-	return m.sendMessage("MAIN", DEBUG, message)
+func (m *MockLogClient) Debug(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return m.sendMessage("MAIN", DEBUG, message, fields)
 }
 
-func (m *MockLogClient) Info(message string) error {
-	return m.sendMessage("MAIN", INFO, message)
+func (m *MockLogClient) Info(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return m.sendMessage("MAIN", INFO, message, fields)
 }
 
-func (m *MockLogClient) Warn(message string) error {
-	return m.sendMessage("MAIN", WARN, message)
+func (m *MockLogClient) Warn(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return m.sendMessage("MAIN", WARN, message, fields)
 }
 
-func (m *MockLogClient) Error(message string) error {
-	return m.sendMessage("MAIN", ERROR, message)
+func (m *MockLogClient) Error(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return m.sendMessage("MAIN", ERROR, message, fields)
 }
 
-func (m *MockLogClient) Fatal(message string) error {
-	return m.sendMessage("MAIN", FATAL, message)
+func (m *MockLogClient) Fatal(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return m.sendMessage("MAIN", FATAL, message, fields)
 }
 
-func (m *MockLogClient) Panic(message string) error {
-	return m.sendMessage("MAIN", PANIC, message)
+func (m *MockLogClient) Panic(args ...interface{}) error {
+	// Обрабатываем аргументы и отправляем сообщение
+	message, fields := processArgs(args...)
+	return m.sendMessage("MAIN", PANIC, message, fields)
 }
 
-// Форматированные методы (моки)
-func (m *MockLogClient) Debugf(format string, args ...interface{}) error {
-	return m.sendMessage("MAIN", DEBUG, format)
-}
-
-func (m *MockLogClient) Infof(format string, args ...interface{}) error {
-	return m.sendMessage("MAIN", INFO, format)
-}
-
-func (m *MockLogClient) Warnf(format string, args ...interface{}) error {
-	return m.sendMessage("MAIN", WARN, format)
-}
-
-func (m *MockLogClient) Errorf(format string, args ...interface{}) error {
-	return m.sendMessage("MAIN", ERROR, format)
-}
-
-func (m *MockLogClient) Fatalf(format string, args ...interface{}) error {
-	return m.sendMessage("MAIN", FATAL, format)
-}
-
-func (m *MockLogClient) Panicf(format string, args ...interface{}) error {
-	return m.sendMessage("MAIN", PANIC, format)
-}
+// Комментарий: Устаревшие форматированные методы и методы с суффиксом WithFields удалены.
+// Теперь все функции логирования используют универсальный интерфейс с вариативными аргументами.
 
 // MockConn мок сетевого соединения
 type MockConn struct {
@@ -346,3 +351,5 @@ func MockConfigWithServices(services []string) *LoggingConfig {
 		Services:   services,
 	}
 }
+
+// // Функция processArgs перемещена в utils.go

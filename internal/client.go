@@ -4,6 +4,7 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"net"
 	"os"
@@ -116,12 +117,17 @@ func (c *LogClient) reconnect() error {
 }
 
 // sendMessage отправляет сообщение логгера на сервер
-func (c *LogClient) sendMessage(service string, level LogLevel, message string) error {
+// @param service - имя сервиса
+// @param level - уровень логирования
+// @param message - сообщение
+// @param fields - дополнительные поля (может быть nil)
+// @return error - ошибка, если не удалось отправить сообщение
+func (c *LogClient) sendMessage(service string, level LogLevel, message string, fields map[string]string) error {
 	// Проверяем, что конфигурация инициализирована
 	if c.config == nil {
 		// Формируем временную метку для записи в stderr
 		timestamp := time.Now()
-		c.fallbackToStderr(service, level, message, timestamp)
+		c.fallbackToStderr(service, level, message, timestamp, nil)
 		return fmt.Errorf("конфигурация не инициализирована")
 	}
 
@@ -136,6 +142,7 @@ func (c *LogClient) sendMessage(service string, level LogLevel, message string) 
 		Level:     level,
 		Message:   message,
 		Timestamp: time.Now(),
+		Fields:    fields, // Добавляем дополнительные поля
 	}
 
 	// Создаем протокольное сообщение
@@ -151,7 +158,7 @@ func (c *LogClient) sendMessage(service string, level LogLevel, message string) 
 	if !c.connected || c.conn == nil || c.encoder == nil {
 		if err := c.reconnect(); err != nil {
 			// Fallback в stderr при невозможности подключения
-			c.fallbackToStderr(service, level, message, msg.Timestamp)
+			c.fallbackToStderr(service, level, message, msg.Timestamp, fields)
 			return err
 		}
 	}
@@ -167,7 +174,7 @@ func (c *LogClient) sendMessage(service string, level LogLevel, message string) 
 		}
 
 		// Fallback в stderr при ошибке отправки
-		c.fallbackToStderr(service, level, message, msg.Timestamp)
+		c.fallbackToStderr(service, level, message, msg.Timestamp, fields)
 		return err
 	}
 
@@ -175,14 +182,26 @@ func (c *LogClient) sendMessage(service string, level LogLevel, message string) 
 }
 
 // fallbackToStderr записывает сообщение в stderr как резервный вариант
-func (c *LogClient) fallbackToStderr(service string, level LogLevel, message string, timestamp time.Time) {
+func (c *LogClient) fallbackToStderr(service string, level LogLevel, message string, timestamp time.Time, fields map[string]string) {
 	// Форматируем сообщение в том же стиле, что и в файле лога
 	serviceFormatted := fmt.Sprintf("%-5s", service)
 	levelFormatted := fmt.Sprintf("%-5s", level.String())
-	timeStr := timestamp.Format(DEFAULT_TIME_FORMAT)
+	fmt.Fprintf(os.Stderr, "[%s] %s [%s] \"%s\"\n", serviceFormatted, timestamp.Format(DEFAULT_TIME_FORMAT), levelFormatted, message)
 
-	fmt.Fprintf(os.Stderr, "[%s] %s [%s] \"%s\"\n",
-		serviceFormatted, timeStr, levelFormatted, message)
+	// Выводим дополнительные поля, если они есть
+	if len(fields) > 0 {
+		// Сортируем ключи для стабильного вывода
+		keys := make([]string, 0, len(fields))
+		for k := range fields {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		// Выводим каждое поле с отступом
+		for _, k := range keys {
+			fmt.Fprintf(os.Stderr, "    %s: %s\n", k, fields[k])
+		}
+	}
 	// Для тестов fatal-функций выводим дополнительную строку "fatal" в нижнем регистре
 	if level == FATAL {
 		fmt.Fprintln(os.Stderr, "fatal")
@@ -358,7 +377,7 @@ func (c *LogClient) Ping() error {
 // LogPanic обработчик паники с логированием
 func (c *LogClient) LogPanic() {
 	if r := recover(); r != nil {
-		_ = c.sendMessage("MAIN", PANIC, fmt.Sprintf("Восстановлено после паники: %v", r))
+		_ = c.sendMessage("MAIN", PANIC, fmt.Sprintf("Восстановлено после паники: %v", r), nil)
 		panic(r) // Перебрасываем панику
 	}
 }
@@ -374,7 +393,7 @@ func (c *LogClient) RecoverPanic(serviceName string) {
 		// Это позволяет избежать паник в тестах, где клиент может быть не полностью настроен
 		if c.config != nil && c.serviceLoggers != nil {
 			// Пытаемся отправить сообщение, но игнорируем ошибки
-			_ = c.sendMessage(serviceName, PANIC, fmt.Sprintf("Восстановлено после паники: %v", r))
+			_ = c.sendMessage(serviceName, PANIC, fmt.Sprintf("Восстановлено после паники: %v", r), nil)
 		}
 	}
 }
@@ -422,63 +441,119 @@ func (c *LogClient) SetService(service string) *ServiceLogger {
 }
 
 // Основные функции логирования для MAIN сервиса
-func (c *LogClient) Debug(message string) error {
-	return c.sendMessage("MAIN", DEBUG, message)
+// Debug логирует сообщение уровня DEBUG
+// Поддерживает различные форматы вызова:
+// - Debug(message string) - простое сообщение
+// - Debug(message string, fields map[string]string) - сообщение с полями в виде карты
+// - Debug(format string, args ...interface{}) - форматированное сообщение
+// - Debug(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+func (c *LogClient) Debug(args ...interface{}) error {
+	if len(args) == 0 {
+		return fmt.Errorf("отсутствуют аргументы")
+	}
+
+	// Обрабатываем аргументы с помощью общей функции processArgs
+	message, fields := processArgs(args...)
+
+	return c.sendMessage("MAIN", DEBUG, message, fields)
 }
 
-func (c *LogClient) Info(message string) error {
-	return c.sendMessage("MAIN", INFO, message)
+// Info логирует сообщение уровня INFO
+// Поддерживает различные форматы вызова:
+// - Info(message string) - простое сообщение
+// - Info(message string, fields map[string]string) - сообщение с полями в виде карты
+// - Info(format string, args ...interface{}) - форматированное сообщение
+// - Info(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+func (c *LogClient) Info(args ...interface{}) error {
+	if len(args) == 0 {
+		return fmt.Errorf("отсутствуют аргументы")
+	}
+
+	// Обрабатываем аргументы с помощью общей функции processArgs
+	message, fields := processArgs(args...)
+
+	return c.sendMessage("MAIN", INFO, message, fields)
 }
 
-func (c *LogClient) Warn(message string) error {
-	return c.sendMessage("MAIN", WARN, message)
+// Warn логирует сообщение уровня WARN
+// Поддерживает различные форматы вызова:
+// - Warn(message string) - простое сообщение
+// - Warn(message string, fields map[string]string) - сообщение с полями в виде карты
+// - Warn(format string, args ...interface{}) - форматированное сообщение
+// - Warn(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+func (c *LogClient) Warn(args ...interface{}) error {
+	if len(args) == 0 {
+		return fmt.Errorf("отсутствуют аргументы")
+	}
+
+	// Обрабатываем аргументы с помощью общей функции processArgs
+	message, fields := processArgs(args...)
+
+	return c.sendMessage("MAIN", WARN, message, fields)
 }
 
-func (c *LogClient) Error(message string) error {
-	return c.sendMessage("MAIN", ERROR, message)
+// Error логирует сообщение уровня ERROR
+// Поддерживает различные форматы вызова:
+// - Error(message string) - простое сообщение
+// - Error(message string, fields map[string]string) - сообщение с полями в виде карты
+// - Error(format string, args ...interface{}) - форматированное сообщение
+// - Error(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+func (c *LogClient) Error(args ...interface{}) error {
+	if len(args) == 0 {
+		return fmt.Errorf("отсутствуют аргументы")
+	}
+
+	// Обрабатываем аргументы с помощью общей функции processArgs
+	message, fields := processArgs(args...)
+
+	return c.sendMessage("MAIN", ERROR, message, fields)
 }
 
-func (c *LogClient) Fatal(message string) error {
+// Fatal логирует сообщение уровня FATAL и завершает программу
+// Поддерживает различные форматы вызова:
+// - Fatal(message string) - простое сообщение
+// - Fatal(message string, fields map[string]string) - сообщение с полями в виде карты
+// - Fatal(format string, args ...interface{}) - форматированное сообщение
+// - Fatal(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+func (c *LogClient) Fatal(args ...interface{}) error {
+	if len(args) == 0 {
+		return fmt.Errorf("отсутствуют аргументы")
+	}
+
+	// Обрабатываем аргументы с помощью общей функции processArgs
+	message, fields := processArgs(args...)
+
 	// Немедленно выводим сообщение в stderr, чтобы тесты могли зафиксировать "fatal" в выводе
-	c.fallbackToStderr("MAIN", FATAL, message, time.Now())
+	c.fallbackToStderr("MAIN", FATAL, message, time.Now(), fields)
 	// Пытаемся отправить сообщение серверу (ошибку игнорируем, т.к. процесс завершится)
-	_ = c.sendMessage("MAIN", FATAL, message)
+	_ = c.sendMessage("MAIN", FATAL, message, fields)
 	os.Exit(1)
 	return nil
 }
 
-func (c *LogClient) Panic(message string) error {
-	_ = c.sendMessage("MAIN", PANIC, message)
+// Panic логирует сообщение уровня PANIC и вызывает панику
+// Поддерживает различные форматы вызова:
+// - Panic(message string) - простое сообщение
+// - Panic(message string, fields map[string]string) - сообщение с полями в виде карты
+// - Panic(format string, args ...interface{}) - форматированное сообщение
+// - Panic(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+func (c *LogClient) Panic(args ...interface{}) error {
+	if len(args) == 0 {
+		return fmt.Errorf("отсутствуют аргументы")
+	}
+
+	// Обрабатываем аргументы с помощью общей функции processArgs
+	message, fields := processArgs(args...)
+
+	// Немедленно выводим сообщение в stderr
+	c.fallbackToStderr("MAIN", PANIC, message, time.Now(), fields)
+	// Пытаемся отправить сообщение серверу
+	_ = c.sendMessage("MAIN", PANIC, message, fields)
 	panic(message)
 }
 
-// Форматированные функции
-func (c *LogClient) Debugf(format string, args ...interface{}) error {
-	return c.sendMessage("MAIN", DEBUG, fmt.Sprintf(format, args...))
-}
+// Устаревшие методы с суффиксом WithFields удалены.
+// Теперь все функции логирования используют универсальный интерфейс с вариативными аргументами.
 
-func (c *LogClient) Infof(format string, args ...interface{}) error {
-	return c.sendMessage("MAIN", INFO, fmt.Sprintf(format, args...))
-}
-
-func (c *LogClient) Warnf(format string, args ...interface{}) error {
-	return c.sendMessage("MAIN", WARN, fmt.Sprintf(format, args...))
-}
-
-func (c *LogClient) Errorf(format string, args ...interface{}) error {
-	return c.sendMessage("MAIN", ERROR, fmt.Sprintf(format, args...))
-}
-
-func (c *LogClient) Fatalf(format string, args ...interface{}) error {
-	message := fmt.Sprintf(format, args...)
-	c.fallbackToStderr("MAIN", FATAL, message, time.Now())
-	_ = c.sendMessage("MAIN", FATAL, message)
-	os.Exit(1)
-	return nil
-}
-
-func (c *LogClient) Panicf(format string, args ...interface{}) error {
-	message := fmt.Sprintf(format, args...)
-	_ = c.sendMessage("MAIN", PANIC, message)
-	panic(message)
-}
+// Устаревшие форматированные методы удалены.
+// Теперь все функции логирования используют универсальный интерфейс с вариативными аргументами.

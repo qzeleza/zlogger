@@ -146,26 +146,26 @@ func TestLoggerFormattedMethods(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name:     "Debugf",
-			method:   func() error { return logger.Debugf("debug: %s %d", "test", 123) },
+			name:     "Debug с форматированием",
+			method:   func() error { return logger.Debug("debug: %s %d", "test", 123) },
 			expected: "debug: test 123",
 			wantErr:  false,
 		},
 		{
-			name:     "Infof",
-			method:   func() error { return logger.Infof("info: %v", map[string]int{"count": 5}) },
+			name:     "Info с форматированием",
+			method:   func() error { return logger.Info("info: %v", map[string]int{"count": 5}) },
 			expected: "info: map[count:5]",
 			wantErr:  false,
 		},
 		{
-			name:     "Warnf",
-			method:   func() error { return logger.Warnf("warn: %.2f%%", 85.67) },
+			name:     "Warn с форматированием",
+			method:   func() error { return logger.Warn("warn: %.2f%%", 85.67) },
 			expected: "warn: 85.67%",
 			wantErr:  false,
 		},
 		{
-			name:     "Errorf",
-			method:   func() error { return logger.Errorf("error: %t", true) },
+			name:     "Error с форматированием",
+			method:   func() error { return logger.Error("error: %t", true) },
 			expected: "error: true",
 			wantErr:  false,
 		},

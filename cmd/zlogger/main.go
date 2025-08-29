@@ -77,15 +77,15 @@ func demonstrateFormattedLogging(logger *zlogger.Logger) {
 	// Форматированное логирование для основного сервиса
 	userID := 12345
 	requestTime := 150
-	logger.Infof("Пользователь %d выполнил запрос за %d мс", userID, requestTime)
-	logger.Debugf("Детали запроса: метод=%s, путь=%s, IP=%s", "GET", "/api/users", "192.168.1.100")
+	logger.Info("Пользователь %d выполнил запрос за %d мс", userID, requestTime)
+	logger.Debug("Детали запроса: метод=%s, путь=%s, IP=%s", "GET", "/api/users", "192.168.1.100")
 
 	// Форматированное логирование для сервисов
 	dbLogger := logger.SetService("DATABASE")
-	dbLogger.Errorf("Ошибка подключения к БД: %s, попытка %d из %d", "connection timeout", 3, 5)
+	dbLogger.Error("Ошибка подключения к БД: %s, попытка %d из %d", "connection timeout", 3, 5)
 
 	cacheLogger := logger.SetService("CACHE")
-	cacheLogger.Infof("Статистика кеша: попаданий=%d, промахов=%d, коэффициент=%.2f",
+	cacheLogger.Info("Статистика кеша: попаданий=%d, промахов=%d, коэффициент=%.2f",
 		850, 150, 0.85)
 
 	fmt.Println("Форматированные сообщения записаны в лог")

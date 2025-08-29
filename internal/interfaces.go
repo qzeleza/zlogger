@@ -14,21 +14,18 @@ type LogClientInterface interface {
 	Close() error
 
 	// Методы логирования для MAIN сервиса
-	Debug(message string) error
-	Info(message string) error
-	Warn(message string) error
-	Error(message string) error
-	Fatal(message string) error
-	Panic(message string) error
-
-	// Форматированные методы
-	Debugf(format string, args ...interface{}) error
-	Infof(format string, args ...interface{}) error
-	Warnf(format string, args ...interface{}) error
-	Errorf(format string, args ...interface{}) error
-	Fatalf(format string, args ...interface{}) error
-	Panicf(format string, args ...interface{}) error
+	// Поддерживают различные форматы вызова:
+	// - Debug(message string) - простое сообщение
+	// - Debug(message string, fields map[string]string) - сообщение с полями в виде карты
+	// - Debug(format string, args ...interface{}) - форматированное сообщение
+	// - Debug(message string, keyValues ...string) - сообщение с полями в виде пар ключ-значение
+	Debug(args ...interface{}) error
+	Info(args ...interface{}) error
+	Warn(args ...interface{}) error
+	Error(args ...interface{}) error
+	Fatal(args ...interface{}) error
+	Panic(args ...interface{}) error
 
 	// Внутренний метод для отправки сообщений
-	sendMessage(service string, level LogLevel, message string) error
+	sendMessage(service string, level LogLevel, message string, fields map[string]string) error
 }
